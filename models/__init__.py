@@ -14,6 +14,8 @@ Available models:
   - 'mmd-median'    : MMD domain adaptation (median-heuristic kernel bandwidth)
   - 'maxrm_mse'     : MaxRM Random Forest with MSE risk
   - 'maxrm_regret'  : MaxRM Random Forest with regret risk
+  - 'tabpfn'        : TabPFN prior-data fitted network regressor ('tabpfn',
+                       'tabpfn-v2.6', 'tabpfn-v3')
 """
 
 import numpy as np
@@ -102,11 +104,16 @@ def get_model(model_name, params=None):
     elif model_name == 'maxrm-regret':
         from .maxrm_rf import MaxRM_RF
         return MaxRM_RF(risk='regret', **params)
-    
+
+    elif model_name == 'tabpfn' or model_name.startswith('tabpfn-'):
+        from .tabpfn import TabPFN
+        version = model_name.removeprefix('tabpfn').lstrip('-') or None
+        return TabPFN(version=version, **params)
+
     else:
         raise NotImplementedError(
             f"Model `{model_name}` not implemented. "
-            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'maxrm_mse', 'maxrm_regret'"
+            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'maxrm_mse', 'maxrm_regret', 'tabpfn'"
         )
 
 
@@ -132,6 +139,12 @@ def get_random_params(model_name, n_iter=10):
 
     if model_name in ['lr', 'constant']:
         return [{}]
+
+    if model_name.startswith('tabpfn'):
+        return [
+            {'n_estimators': 1, 'subsample_samples': 30_000, 'random_state': 42},
+            {'n_estimators': 4, 'subsample_samples': 10_000, 'random_state': 42},
+        ]
 
     random_configs = []
     for _ in range(n_iter):
