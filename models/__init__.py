@@ -14,8 +14,8 @@ Available models:
   - 'mmd-median'    : MMD domain adaptation (median-heuristic kernel bandwidth)
   - 'maxrm_mse'     : MaxRM Random Forest with MSE risk
   - 'maxrm_regret'  : MaxRM Random Forest with regret risk
-  - 'tabpfn'        : TabPFN prior-data fitted network regressor ('tabpfn',
-                       'tabpfn-v2.6', 'tabpfn-v3')
+  - 'tabpfn-v2.5'   : TabPFN prior-data fitted network regressor
+                       ('tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3')
 """
 
 import numpy as np
@@ -105,15 +105,22 @@ def get_model(model_name, params=None):
         from .maxrm_rf import MaxRM_RF
         return MaxRM_RF(risk='regret', **params)
 
-    elif model_name == 'tabpfn' or model_name.startswith('tabpfn-'):
+    elif model_name.startswith('tabpfn'):
         from .tabpfn import TabPFN
-        version = model_name.removeprefix('tabpfn').lstrip('-') or None
+        version = model_name.removeprefix('tabpfn').lstrip('-')
+        if not version:
+            raise ValueError(
+                "Use an explicit TabPFN version, e.g. 'tabpfn-v2.5'. The bare "
+                "name 'tabpfn' is not a model name: it has no entry in "
+                "get_random_params and would fall through to the generic "
+                "random search."
+            )
         return TabPFN(version=version, **params)
 
     else:
         raise NotImplementedError(
             f"Model `{model_name}` not implemented. "
-            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'maxrm_mse', 'maxrm_regret', 'tabpfn'"
+            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'maxrm_mse', 'maxrm_regret', 'tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3'"
         )
 
 
@@ -140,10 +147,17 @@ def get_random_params(model_name, n_iter=10):
     if model_name in ['lr', 'constant']:
         return [{}]
 
-    if model_name.startswith('tabpfn'):
+    if model_name == 'tabpfn-v2.5':
         return [
-            {'n_estimators': 1, 'subsample_samples': 30_000, 'random_state': 42},
-            {'n_estimators': 4, 'subsample_samples': 10_000, 'random_state': 42},
+            {'n_estimators': 1, 'subsample_samples': 30_000, 'random_state': 42}
+            ]
+    if model_name == 'tabpfn-v2.6':
+        return [
+            {'n_estimators': 1, 'subsample_samples': 100_000, 'random_state': 42},
+        ]
+    if model_name == 'tabpfn-v3':
+        return [
+            {'n_estimators': 1, 'subsample_samples': 1_000_000, 'random_state': 42},
         ]
 
     random_configs = []
