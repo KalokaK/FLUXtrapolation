@@ -18,7 +18,7 @@ HIGHER_IS_BETTER = {'nse', 'r2_score', 'pearson_corr'}
 MODEL_ORDER = ['xgb', 'lightgbm', 'mlp', 'lstm',
                'gdro', 'coral', 'mmd',
                'lr', 'robust-lr', 'ridge',  'constant',
-               'tabpfn', 'tabpfn-v2.6', 'tabpfn-v3']
+               'tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3']
 color_palette = sns.color_palette("tab10", n_colors=len(MODEL_ORDER))
 MODEL_COLORS = {model: color_palette[i] for i, model in enumerate(MODEL_ORDER)}
 _EXTRA_PALETTE = sns.color_palette("Set2") + sns.color_palette("tab20")
