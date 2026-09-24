@@ -47,7 +47,7 @@ from utils.utils import setup_logging, get_metrics_path, RESULTS_DIR
 logger = setup_logging(__name__)
 
 SETTINGS = ['time-split', 'spatial-easy40', 'TA40']
-VERSIONS = ['v2.5', 'v2.6', 'v3']
+VERSIONS = ['v2.5', 'v2.6', 'v3', 'v3-ood']
 
 # Results are saved with this val_strategy tag so they sit alongside the
 # baselines in eval.load_all_metrics(val_strategy='mean'). Nothing is actually
@@ -58,15 +58,17 @@ RANDOM_STATE = 42
 # --- context-size ablation -----------------------------------------------
 # Extra context sizes per version, on top of the version's default context.
 EXTRA_CONTEXT_SIZES = {
-    'v2.5': [10_000],
+    'v2.5': [10_000, 30_000],
     'v2.6': [10_000, 30_000],
     'v3':   [10_000, 30_000, 100_000],
+    'v3-ood': [10_000, 30_000, 100_000],
 }
 
 # --- ensemble-size ablation ----------------------------------------------
-# Context held fixed while n_estimators varies. v3 is capped at 100k rather
-# than its 1M default: memory scales with context x n_estimators.
-BASE_CONTEXT = {'v2.5': 30_000, 'v2.6': 100_000, 'v3': 100_000}
+# Context held fixed while n_estimators varies. The v3 checkpoints are capped at
+# 100k rather than their 1M default: memory scales with context x n_estimators.
+BASE_CONTEXT = {'v2.5': 30_000, 'v2.6': 100_000, 'v3': 100_000,
+                'v3-ood': 100_000}
 N_ESTIMATORS = [1, 2, 4]
 
 def runtime_csv_path(settings):
@@ -135,8 +137,8 @@ def run_name(version, context, n_estimators):
     Model name used for the results files.
 
     The version's default configuration keeps the plain benchmark name
-    (`tabpfn-v2.5`, `tabpfn-v2.6`, `tabpfn-v3`), so a run already made with
-    train_model.py is reused rather than refitted. Every other configuration
+    (`tabpfn-v2.5`, `tabpfn-v2.6`, `tabpfn-v3`, `tabpfn-v3-ood`), so a run
+    already made with train_model.py is reused rather than refitted. Every other configuration
     gets a suffix.
     """
     if DEFAULT_CONFIGS.get(version) == (context, n_estimators):
@@ -208,9 +210,9 @@ if __name__ == "__main__":
     parser.add_argument("--skip-defaults", action='store_true',
                         help="Drop the configurations that are a version's "
                              "benchmark default, i.e. the ones that would be "
-                             "saved as plain tabpfn-v2.5/-v2.6/-v3. Use this "
-                             "when train_model.py is producing those runs for "
-                             "the same setting concurrently.")
+                             "saved as plain tabpfn-v2.5/-v2.6/-v3/-v3-ood. "
+                             "Use this when train_model.py is producing those "
+                             "runs for the same setting concurrently.")
 
     args = parser.parse_args()
     settings = SETTINGS if args.setting == 'all' else [args.setting]
