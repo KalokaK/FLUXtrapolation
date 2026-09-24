@@ -31,6 +31,7 @@ PyTorch uses CPU by default. For GPU support, install the appropriate CUDA versi
 tabpfn-v2.5-regressor-v2.5_default.ckpt   # used by --model_name tabpfn-v2.5
 tabpfn-v2.6-regressor-v2.6_default.ckpt   # used by --model_name tabpfn-v2.6
 tabpfn-v3-regressor-v3_default.ckpt       # used by --model_name tabpfn-v3
+tabpfn-v3-regressor-v3_20260506_ood.ckpt  # used by --model_name tabpfn-v3-ood
 ```
 
 ---
@@ -109,6 +110,7 @@ Training performs random hyperparameter search and selects the best model under 
 | `tabpfn-v2.5` | TabPFN v2.5 regressor (prior-data fitted network, local checkpoint required) | — |
 | `tabpfn-v2.6` | TabPFN v2.6 regressor (local checkpoint required) | — |
 | `tabpfn-v3` | TabPFN v3 regressor (local checkpoint required) | — |
+| `tabpfn-v3-ood` | TabPFN v3 regressor, OOD-tuned checkpoint (local checkpoint required) | — |
 
 ---
 

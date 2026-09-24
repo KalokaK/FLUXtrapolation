@@ -14,6 +14,7 @@ _CKPTS = {
     'v2.5': 'tabpfn-v2.5-regressor-v2.5_default.ckpt',
     'v2.6': 'tabpfn-v2.6-regressor-v2.6_default.ckpt',
     'v3': 'tabpfn-v3-regressor-v3_default.ckpt',
+    'v3-ood': 'tabpfn-v3-regressor-v3_20260506_ood.ckpt',
 }
 
 _DEFAULT_VERSION = 'v2.5'
