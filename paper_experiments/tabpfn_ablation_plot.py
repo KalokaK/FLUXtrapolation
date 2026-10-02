@@ -67,8 +67,8 @@ REFERENCE_COLOR = '#1f77b4'
 VERSION_COLORS = dict(zip(VERSIONS,
                           plt.get_cmap('inferno')(np.linspace(0.8, 0.3, len(VERSIONS)))))
 MARKER_SIZE = 3
-VERSION_LABELS = {'v2.5': 'TabPFN-2.5', 'v2.6': 'TabPFN-2.6', 'v3': 'TabPFN-3',
-                  'v3-ood': 'TabPFN-3 (OOD)'}
+VERSION_LABELS = {'v2.5': 'TabPFN2.5', 'v2.6': 'TabPFN2.6', 'v3': 'TabPFN3',
+                  'v3-ood': 'TabPFN3-ood'}
 
 # The NeurIPS text block is 5.5 in wide. Keeping the cropped figure inside it
 # is what lets the figure be included at its natural size, which in turn is what
