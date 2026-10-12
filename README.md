@@ -9,7 +9,7 @@ A benchmark for evaluating ML models under distribution shift using FLUXNET eddy
 
 ---
 
-## 🏆 Leaderboard
+## 🏆 Leaderboard 🏆
 
 Results are available at the [FLUXtrapolation leaderboard](https://anyafries.github.io/FLUXtrapolation-leaderboard/index.html#ET). Submissions accepted via an upload form there.
 
