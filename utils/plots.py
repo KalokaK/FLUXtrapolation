@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.colors import to_hex
 import numpy as np
 import os
 import pandas as pd
@@ -15,19 +16,44 @@ PLOTS_DIR = 'results/plots'
 SCALES = ['hourly', 'daily', 'weekly', 'monthly', 'seasonal', 'anom', 'iav']
 SETTINGS_ORDER = ['time-split', 'spatial-easy40', 'TA40']
 HIGHER_IS_BETTER = {'nse', 'r2_score', 'pearson_corr'}
-MODEL_ORDER = ['xgb', 'lightgbm', 'mlp', 'lstm',
-               'gdro', 'coral', 'mmd',
-               'lr', 'robust-lr', 'ridge',  'constant',
-               'tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3']
-color_palette = sns.color_palette("tab10", n_colors=len(MODEL_ORDER))
-MODEL_COLORS = {model: color_palette[i] for i, model in enumerate(MODEL_ORDER)}
-_EXTRA_PALETTE = sns.color_palette("Set2") + sns.color_palette("tab20")
+MODEL_COLORS = {
+    'xgb':           '#1f77b4',
+    'lightgbm':      '#9467bd',
+    'mlp':           '#2ca02c',
+    'lstm':          '#d62728',
+    'gdro':          '#1b9e77',
+    'coral':         '#8c564b',
+    'mmd':           '#e377c2',
+    'tabpfn-v2.6':   '#e6ab02',
+    'tabpfn-v3-ood': '#ff7f0e',
+    'lr':            "#575757",
+    'robust-lr':     '#17becf',
+    'ridge':         '#bcbd22',
+    'constant':      "#969696",
+}
+MODEL_ORDER = list(MODEL_COLORS)
+# Display names used in the paper figures and tables.
+MODEL_NAMES = {
+    'xgb':           'XGBoost',
+    'mlp':           'MLP',
+    'lstm':          'LSTM',
+    'gdro':          'GroupDRO',
+    'coral':         'CORAL',
+    'mmd':           'MMD',
+    'tabpfn-v2.6':   'TabPFN2.6',
+    'tabpfn-v3-ood': 'TabPFN3-ood',
+    'lr':            'Linear reg.',
+    'constant':      'Constant',
+}
+_USED_COLORS = set(MODEL_COLORS.values())
+_EXTRA_PALETTE = [c for c in map(to_hex, sns.color_palette("Set2") + sns.color_palette("tab20"))
+                  if c not in _USED_COLORS]
 
 
 def get_model_colors(models):
     """Return a color mapping covering all models.
 
-    Known models (in MODEL_ORDER) keep their fixed color; any new methods are
+    Known models (in MODEL_COLORS) keep their fixed color; any new methods are
     assigned distinct colors from a fallback palette, appended in order.
     """
     colors = dict(MODEL_COLORS)
@@ -35,6 +61,11 @@ def get_model_colors(models):
     for i, model in enumerate(extras):
         colors[model] = _EXTRA_PALETTE[i % len(_EXTRA_PALETTE)]
     return colors
+
+
+def get_model_name(model):
+    """Display name of a model; models without one keep their key."""
+    return MODEL_NAMES.get(model, model)
 
 
 def get_ordered_models(models):

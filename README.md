@@ -9,9 +9,9 @@ A benchmark for evaluating ML models under distribution shift using FLUXNET eddy
 
 ---
 
-## Leaderboard
+## 🏆 Leaderboard 🏆
 
-A leaderboard is available at [link removed for anonymity], with submissions accepted via pull request. See [example_leaderboard.pdf](example_leaderboard.pdf) for a preview (download for best viewing).
+Results are available at the [FLUXtrapolation leaderboard](https://anyafries.github.io/FLUXtrapolation-leaderboard/index.html#ET). Submissions accepted via an upload form there.
 
 ---
 
@@ -38,12 +38,15 @@ tabpfn-v3-regressor-v3_20260506_ood.ckpt  # used by --model_name tabpfn-v3-ood
 
 ## Data
 
-**Data can be downloaded using the link in the paper.**
+The data consists of one CSV per FLUXNET site, available on [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/Q1MPVG).
+All the sites should be downloaded and saved in `data/sites/`. 
 
-Each site is stored as a CSV as should be saved in `data/sites/`. The benchmark uses **13 covariates** per hourly observation:
+The data consists of **13 covariates** per hourly observation:
 - **Meteorological:** air temperature (TA), vapor pressure deficit (VPD), incoming shortwave radiation (SW\_IN), and others
 - **Site characteristics:** IGBP vegetation type
 - **Satellite-derived:** enhanced vegetation index (EVI), land surface temperature (LST), normalized difference water index (NDWI), and others
+
+The CSV that is already present at `data/sites_with_2018.csv` is a list of site IDs used for the temporal scenario (the sites with at least five years of data and observations in 2018).
 
 ---
 
@@ -64,12 +67,14 @@ Run `--setting all` to run all three (default).
 
 Once you have trained a model, we wish to evaluate it over the median and 90th percentile of held-out sites and site-years, along with several temporal aggregates. For example, we can look at ET and the 90th percentiles of RMSE. Good models do not degrade badly for any of the metrics.
 
-![q90_table](figures/q90_table.png)
+<p align="center">
+  <img src="figures/q90_table.png" alt="q90_table" width="90%">
+</p>
 
-In more detail, one can look at the CDFs for an (extapolation scenario, aggregation) pair. For example for RMSE of weekly ET in the temperature-based extrapolation, we see that models whcih appear more similar at the median diverge further in the tails.
+In more detail, one can look at the CDFs for an (extapolation scenario, aggregation) pair. For example,  for RMSE of weekly GPP in the temperature-based extrapolation, we see that LSTM and Group DRO appear similar at the median and diverge further in the tails.
 
 <p align="center">
-  <img src="figures/cdf_ET_rmse_weekly.png " alt="cdf" width="30%">
+  <img src="figures/cdf_weekly.png" alt="cdf" width="80%">
 </p>
 
 ---

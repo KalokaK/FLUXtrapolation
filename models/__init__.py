@@ -12,10 +12,13 @@ Available models:
   - 'coral'         : CORAL domain adaptation
   - 'mmd'           : MMD domain adaptation (fixed multi-scale kernel bandwidths)
   - 'mmd-median'    : MMD domain adaptation (median-heuristic kernel bandwidth)
+<<<<<<< HEAD
   - 'maxrm_mse'     : MaxRM Random Forest with MSE risk
   - 'maxrm_regret'  : MaxRM Random Forest with regret risk
   - 'tabpfn-v2.5'   : TabPFN prior-data fitted network regressor
                        ('tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3', 'tabpfn-v3-ood')
+=======
+>>>>>>> upstream/main
 """
 
 import numpy as np
@@ -97,30 +100,19 @@ def get_model(model_name, params=None):
         from .coral import MMD
         return MMD(bandwidth_mode="median", **params)
 
-    elif model_name == 'maxrm-mse':
-        from .maxrm_rf import MaxRM_RF
-        return MaxRM_RF(risk='mse', **params)
-    
-    elif model_name == 'maxrm-regret':
-        from .maxrm_rf import MaxRM_RF
-        return MaxRM_RF(risk='regret', **params)
-
     elif model_name.startswith('tabpfn'):
         from .tabpfn import TabPFN
         version = model_name.removeprefix('tabpfn').lstrip('-')
         if not version:
             raise ValueError(
-                "Use an explicit TabPFN version, e.g. 'tabpfn-v2.5'. The bare "
-                "name 'tabpfn' is not a model name: it has no entry in "
-                "get_random_params and would fall through to the generic "
-                "random search."
+                "Use an explicit TabPFN version, e.g. 'tabpfn-v2.5'."
             )
         return TabPFN(version=version, **params)
 
     else:
         raise NotImplementedError(
             f"Model `{model_name}` not implemented. "
-            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'maxrm_mse', 'maxrm_regret', 'tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3', 'tabpfn-v3-ood'"
+            f"Available models: 'xgb', 'xgb_conservative', 'lr', 'ridge', 'mlp', 'lstm', 'gdro', 'coral', 'mmd', 'mmd-median', 'tabpfn-v2.5', 'tabpfn-v2.6', 'tabpfn-v3', 'tabpfn-v3-ood'"
         )
 
 
@@ -133,7 +125,7 @@ def sample_log_uniform(low, high, rng):
     return float(10 ** rng.uniform(np.log10(low), np.log10(high)))
 
 
-def get_random_params(model_name, n_iter=10):
+def get_random_params(model_name, n_iter=20):
     """
     Generates N random parameter sets for a given model.
     
@@ -161,7 +153,8 @@ def get_random_params(model_name, n_iter=10):
         ]
 
     random_configs = []
-    for _ in range(n_iter):
+    n_off = max(1, n_iter // 10)   # reserve ~1 penalty-off (ERM) config per 10 draws
+    for it in range(n_iter):
         params = {}
 
         if model_name == 'ridge':
@@ -173,13 +166,6 @@ def get_random_params(model_name, n_iter=10):
             params = {
                 'alpha': sample_log_uniform(1e-3, 1e2, np_rng),
                 'epsilon': float(np_rng.uniform(1.1, 2.0))
-            }
-
-        elif model_name in ['maxrm_mse', 'maxrm_regret']:
-            params = {
-                'n_estimators': rng.choice([100, 200, 500, 1000]),
-                'min_samples_leaf': rng.randint(5, 50),
-                'random_state': 42,
             }
 
         elif model_name in ['xgb', 'xgb_conservative']:
@@ -219,10 +205,10 @@ def get_random_params(model_name, n_iter=10):
             # Windowing (window/warmup/stride) is fixed by the CLI, not tuned,
             # so the sequence split can be built once per (setting, target).
             params = {
-                'hidden_size': rng.choice([64, 128]),
+                'hidden_size': rng.choice([32, 64, 128]),
                 'num_layers': rng.choice([1, 2]),
                 'dropout': float(np_rng.uniform(0.0, 0.3)),
-                'lr': sample_log_uniform(1e-4, 1e-2, np_rng),
+                'lr': sample_log_uniform(1e-4, 1e-1, np_rng),
                 'batch_size': rng.choice([32, 64, 128]),
                 'n_epochs': 100,
             }
@@ -230,23 +216,23 @@ def get_random_params(model_name, n_iter=10):
         elif model_name in ['mlp', 'gdro', 'coral', 'mmd', 'mmd-median']:
             # Base deep learning params
             params = {
-                'hidden_dims': rng.choice([[128, 64], [256, 128], [512, 256, 128]]),
+                'hidden_dims': rng.choice([[128, 64], [256, 128], [512, 256, 128], [1024, 512, 256]]),
                 'lr': sample_log_uniform(1e-5, 1e-2, np_rng),
                 'dropout': float(np_rng.uniform(0.0, 0.5)),
                 'n_epochs': 100,
-                'batch_size': rng.choice([512, 1024, 2048])
+                'batch_size': rng.choice([128, 256, 512, 1024])
             }
 
             # Model-specific logic
             if model_name == 'gdro':
-                params['group_weight_step'] = sample_log_uniform(1e-4, 1e-1, np_rng)
+                params['group_weight_step'] = 0.0 if it < n_off else sample_log_uniform(1e-4, 1e-1, np_rng)
             elif model_name == 'coral':
-                params['coral_lambda'] = sample_log_uniform(1e-2, 1e1, np_rng)
+                params['coral_lambda'] = 0.0 if it < n_off else sample_log_uniform(1e-3, 1e2, np_rng)
             elif model_name in ['mmd', 'mmd-median']:
                 # Same lambda search for both; mmd-median differs only in how the
                 # kernel bandwidth is chosen (set in get_model), which is NOT a
                 # tuned hyperparameter.
-                params['mmd_lambda'] = sample_log_uniform(1e-2, 1e1, np_rng)
+                params['mmd_lambda'] = 0.0 if it < n_off else sample_log_uniform(1e-3, 1e1, np_rng)
 
         random_configs.append(params)
 
